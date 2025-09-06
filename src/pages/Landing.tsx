@@ -17,6 +17,9 @@ import {
 import { useNavigate } from "react-router";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 function CountUp({
   to,
@@ -84,6 +87,14 @@ function CountUp({
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const name = (data.get("name") as string) || "Friend";
+    toast(`Thanks, ${name}! We'll get back to you shortly.`);
+    e.currentTarget.reset();
+  };
 
   const features = [
     {
@@ -273,7 +284,7 @@ export default function Landing() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-24 bg-muted/30">
+      <section id="about" className="py-24 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -327,6 +338,75 @@ export default function Landing() {
               </Card>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          >
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>Contact Us</CardTitle>
+                <CardDescription>We'd love to hear from you. Send us a message and we'll respond soon.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm mb-2 block">Name</label>
+                      <Input name="name" placeholder="Your name" required />
+                    </div>
+                    <div>
+                      <label className="text-sm mb-2 block">Email</label>
+                      <Input name="email" type="email" placeholder="you@example.com" required />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm mb-2 block">Message</label>
+                    <Textarea name="message" placeholder="How can we help?" className="min-h-[120px]" required />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button type="submit">Send Message</Button>
+                    <Button type="button" variant="outline" asChild>
+                      <a href="mailto:support@alumni.example.com">Email Us Directly</a>
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>Reach Us</CardTitle>
+                <CardDescription>Prefer another channel? Use what's most convenient for you.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Support</p>
+                  <p className="font-medium">support@alumni.example.com</p>
+                </div>
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">Community</p>
+                  <p className="font-medium">
+                    <a className="underline" href="#features">Explore Features</a>
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg border">
+                  <p className="text-sm text-muted-foreground">About</p>
+                  <p className="font-medium">
+                    <a className="underline" href="#about">Learn more about us</a>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
