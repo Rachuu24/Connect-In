@@ -379,41 +379,47 @@ export default function Dashboard() {
                     <Briefcase className="h-4 w-4" />
                     Available Mentors
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(mentors ?? []).map((alum) => (
-                      <div key={alum._id} className="p-4 rounded-lg border hover:shadow-md transition-shadow">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
-                            <span className="font-medium text-primary">
-                              {alum.firstName[0]}
-                              {alum.lastName[0]}
-                            </span>
-                          </div>
-                          <div>
-                            <h5 className="font-medium">{alum.firstName} {alum.lastName}</h5>
-                            <p className="text-xs text-muted-foreground">
-                              Class of {alum.graduationYear}{alum.major ? ` • ${alum.major}` : ""}
-                            </p>
-                          </div>
-                        </div>
-                        {alum.currentPosition && (
-                          <p className="text-sm">{alum.currentPosition}</p>
-                        )}
-                        {alum.currentCompany && (
-                          <p className="text-sm text-muted-foreground">{alum.currentCompany}</p>
-                        )}
-                        {alum.skills?.length ? (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {alum.skills.slice(0, 4).map((s, i) => (
-                              <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
-                                {s}
+                  {((mentors ?? []).length === 0) ? (
+                    <div className="p-4 rounded-lg border text-sm text-muted-foreground">
+                      No mentors are available right now.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(mentors ?? []).map((alum) => (
+                        <div key={alum._id} className="p-4 rounded-lg border hover:shadow-md transition-shadow">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
+                              <span className="font-medium text-primary">
+                                {alum.firstName[0]}
+                                {alum.lastName[0]}
                               </span>
-                            ))}
+                            </div>
+                            <div>
+                              <h5 className="font-medium">{alum.firstName} {alum.lastName}</h5>
+                              <p className="text-xs text-muted-foreground">
+                                Class of {alum.graduationYear}{alum.major ? ` • ${alum.major}` : ""}
+                              </p>
+                            </div>
                           </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
+                          {alum.currentPosition && (
+                            <p className="text-sm">{alum.currentPosition}</p>
+                          )}
+                          {alum.currentCompany && (
+                            <p className="text-sm text-muted-foreground">{alum.currentCompany}</p>
+                          )}
+                          {alum.skills?.length ? (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {alum.skills.slice(0, 4).map((s, i) => (
+                                <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
+                                  {s}
+                                </span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
