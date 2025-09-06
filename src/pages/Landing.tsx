@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Twitter, Linkedin, Github } from "lucide-react";
 
 function CountUp({
   to,
@@ -434,42 +435,151 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30">
+      <footer className="border-t bg-gradient-to-b from-muted/30 to-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
+          {/* Top: Brand + Newsletter */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            {/* Brand */}
+            <div className="md:col-span-1">
               <div className="flex items-center space-x-2 mb-4">
                 <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
-                <span className="text-xl font-bold">Connect-In</span>
+                <span className="text-xl font-bold tracking-tight">Connect-In</span>
               </div>
-              <p className="text-muted-foreground mb-4">
-                Connecting alumni worldwide through a comprehensive digital platform for networking, 
-                mentorship, and lifelong relationships.
+              <p className="text-muted-foreground">
+                Your global alumni hub for networking, mentorship, and opportunities.
               </p>
+              <div className="flex items-center gap-3 mt-4">
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-md border hover:bg-muted transition-colors"
+                  aria-label="Twitter"
+                >
+                  <Twitter className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://www.linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-md border hover:bg-muted transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-md border hover:bg-muted transition-colors"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+              </div>
             </div>
-            
+
+            {/* Platform Links */}
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Directory</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Events</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Mentorship</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Donations</a></li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => (isAuthenticated ? navigate("/dashboard") : navigate("/auth"))}
+                  >
+                    Directory
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => (isAuthenticated ? navigate("/dashboard") : navigate("/auth"))}
+                  >
+                    Events
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => (isAuthenticated ? navigate("/dashboard") : navigate("/auth"))}
+                  >
+                    Mentorship
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => (isAuthenticated ? navigate("/dashboard") : navigate("/auth"))}
+                  >
+                    Donations
+                  </button>
+                </li>
               </ul>
             </div>
-            
+
+            {/* Newsletter / Support */}
             <div>
-              <h4 className="font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-4">Stay in the loop</h4>
+              <form
+                className="flex gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget as HTMLFormElement;
+                  const email = new FormData(form).get("newsletter") as string;
+                  if (email) {
+                    toast(`Subscribed with ${email}. Welcome to Connect-In!`);
+                    form.reset();
+                  }
+                }}
+              >
+                <Input name="newsletter" placeholder="you@example.com" type="email" required />
+                <Button type="submit">Subscribe</Button>
+              </form>
+
+              <h4 className="font-semibold mt-8 mb-4">Support</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms of Service</a></li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => toast("Help Center is coming soon.")}
+                  >
+                    Help Center
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => {
+                      const el = document.getElementById("contact");
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                  >
+                    Contact Us
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => toast("Privacy Policy is coming soon.")}
+                  >
+                    Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="hover:text-foreground transition-colors cursor-pointer"
+                    onClick={() => toast("Terms of Service are coming soon.")}
+                  >
+                    Terms of Service
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
+
+          {/* Bottom */}
+          <div className="border-t mt-10 pt-6 text-center text-muted-foreground">
             <p>&copy; 2024 Connect-In. All rights reserved.</p>
           </div>
         </div>
