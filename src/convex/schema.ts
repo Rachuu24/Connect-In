@@ -58,7 +58,10 @@ const schema = defineSchema(
       .index("by_user", ["userId"])
       .index("by_graduation_year", ["graduationYear"])
       .index("by_major", ["major"])
-      .index("by_public", ["isPublic"]),
+      .index("by_public", ["isPublic"])
+      // Add indexes for mentorship browsing
+      .index("by_mentorship_available", ["mentorshipAvailable"])
+      .index("by_mentorship_available_and_is_public", ["mentorshipAvailable", "isPublic"]),
 
     events: defineTable({
       title: v.string(),

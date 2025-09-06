@@ -22,6 +22,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useMutation } from "convex/react";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -31,6 +32,8 @@ export default function Dashboard() {
   const upcomingEvents = useQuery(api.events.getUpcomingEvents, { limit: 4 });
   const userProfile = useQuery(api.alumni.getAlumniProfile, {});
   const [tab, setTab] = useState<"overview" | "directory" | "events" | "mentorship" | "donations">("overview");
+  const mentors = useQuery(api.alumni.getMentors, { limit: 12 });
+  const setMentorAvailability = useMutation(api.alumni.setMentorshipAvailability);
 
   if (isLoading) {
     return (
@@ -330,7 +333,16 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Connect with experienced alumni who can guide your career journey
                     </p>
-                    <Button variant="outline" className="w-full">Browse Mentors</Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const el = document.getElementById("mentorsList");
+                        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                    >
+                      Browse Mentors
+                    </Button>
                   </div>
                   
                   <div className="p-6 rounded-lg border">
@@ -339,7 +351,68 @@ export default function Dashboard() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Share your expertise and help fellow alumni grow professionally
                     </p>
-                    <Button className="w-full">Join as Mentor</Button>
+                    <Button
+                      className="w-full"
+                      onClick={async () => {
+                        try {
+                          await setMentorAvailability({ available: true });
+                          toast("You're now listed as a mentor!");
+                        } catch (err: any) {
+                          const msg = err?.message || "";
+                          if (msg.toLowerCase().includes("profile not found")) {
+                            toast("Complete your profile to join as a mentor.");
+                            navigate("/profile");
+                          } else {
+                            toast(`Failed to update: ${msg || "Unknown error"}`);
+                          }
+                        }
+                      }}
+                    >
+                      Join as Mentor
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Mentors List */}
+                <div id="mentorsList" className="mt-8">
+                  <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Available Mentors
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(mentors ?? []).map((alum) => (
+                      <div key={alum._id} className="p-4 rounded-lg border hover:shadow-md transition-shadow">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
+                            <span className="font-medium text-primary">
+                              {alum.firstName[0]}
+                              {alum.lastName[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <h5 className="font-medium">{alum.firstName} {alum.lastName}</h5>
+                            <p className="text-xs text-muted-foreground">
+                              Class of {alum.graduationYear}{alum.major ? ` • ${alum.major}` : ""}
+                            </p>
+                          </div>
+                        </div>
+                        {alum.currentPosition && (
+                          <p className="text-sm">{alum.currentPosition}</p>
+                        )}
+                        {alum.currentCompany && (
+                          <p className="text-sm text-muted-foreground">{alum.currentCompany}</p>
+                        )}
+                        {alum.skills?.length ? (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {alum.skills.slice(0, 4).map((s, i) => (
+                              <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded">
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>

@@ -61,6 +61,26 @@ export const getAllAlumni = query({
   },
 });
 
+export const getMentors = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const mentors = await ctx.db
+      .query("alumni")
+      .withIndex("by_mentorship_available_and_is_public", (q) =>
+        q.eq("mentorshipAvailable", true).eq("isPublic", true),
+      )
+      .take(args.limit || 50);
+
+    const withUser = await Promise.all(
+      mentors.map(async (alum) => {
+        const user = await ctx.db.get(alum.userId);
+        return { ...alum, user };
+      }),
+    );
+    return withUser;
+  },
+});
+
 export const createOrUpdateProfile = mutation({
   args: {
     firstName: v.string(),
@@ -122,5 +142,25 @@ export const searchAlumni = query({
     });
 
     return filtered;
+  },
+});
+
+export const setMentorshipAvailability = mutation({
+  args: { available: v.boolean() },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Not authenticated");
+
+    const existing = await ctx.db
+      .query("alumni")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+
+    if (!existing) {
+      throw new Error("Profile not found. Please complete your profile first.");
+    }
+
+    await ctx.db.patch(existing._id, { mentorshipAvailable: args.available });
+    return existing._id;
   },
 });
