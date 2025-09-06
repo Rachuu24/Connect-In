@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { 
   Users, 
   Calendar, 
@@ -16,6 +16,70 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { useEffect, useRef, useState } from "react";
+
+function CountUp({
+  to,
+  duration = 1200,
+  prefix = "",
+  suffix = "",
+  compact = false,
+}: {
+  to: number;
+  duration?: number;
+  prefix?: string;
+  suffix?: string;
+  compact?: boolean;
+}) {
+  const [value, setValue] = useState(0);
+  const [hasRun, setHasRun] = useState(false);
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+
+  useEffect(() => {
+    if (!inView || hasRun) return;
+    setHasRun(true);
+    const start = performance.now();
+    const from = 0;
+
+    function formatNumber(n: number) {
+      if (compact) {
+        return new Intl.NumberFormat("en", {
+          notation: "compact",
+          maximumFractionDigits: 1,
+        }).format(n);
+      }
+      return n.toLocaleString();
+    }
+
+    const step = (time: number) => {
+      const elapsed = time - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [inView, hasRun, to, duration, compact]);
+
+  const formatted =
+    compact
+      ? new Intl.NumberFormat("en", {
+          notation: "compact",
+          maximumFractionDigits: 1,
+        }).format(value)
+      : value.toLocaleString();
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {formatted}
+      {suffix}
+    </span>
+  );
+}
 
 export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -55,10 +119,10 @@ export default function Landing() {
   ];
 
   const stats = [
-    { number: "10K+", label: "Active Alumni" },
-    { number: "500+", label: "Events Hosted" },
-    { number: "1K+", label: "Mentorship Connections" },
-    { number: "$2M+", label: "Donations Raised" }
+    { value: 10000, label: "Active Alumni", suffix: "+" },
+    { value: 500, label: "Events Hosted", suffix: "+" },
+    { value: 1000, label: "Mentorship Connections", suffix: "+" },
+    { value: 2000000, label: "Donations Raised", prefix: "$", suffix: "+", compact: true },
   ];
 
   return (
@@ -150,7 +214,12 @@ export default function Landing() {
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                  {stat.number}
+                  <CountUp
+                    to={stat.value}
+                    prefix={stat.prefix ?? ""}
+                    suffix={stat.suffix ?? ""}
+                    compact={stat.compact ?? false}
+                  />
                 </div>
                 <div className="text-muted-foreground">{stat.label}</div>
               </div>
