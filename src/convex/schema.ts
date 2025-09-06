@@ -52,6 +52,8 @@ const schema = defineSchema(
       mentorshipAvailable: v.boolean(),
       skills: v.array(v.string()),
       interests: v.array(v.string()),
+      // Added: optional profile image stored in Convex Storage
+      profileImageId: v.optional(v.id("_storage")),
     })
       .index("by_user", ["userId"])
       .index("by_graduation_year", ["graduationYear"])

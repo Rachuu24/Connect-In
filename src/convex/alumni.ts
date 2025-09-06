@@ -14,7 +14,14 @@ export const getAlumniProfile = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .unique();
 
-    return profile;
+    if (!profile) return null;
+
+    // Attach a signed URL for the profile image (if exists)
+    const profileImageUrl = profile.profileImageId
+      ? await ctx.storage.getUrl(profile.profileImageId)
+      : undefined;
+
+    return { ...profile, profileImageUrl };
   },
 });
 
