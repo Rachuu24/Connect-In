@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { useState } from "react";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const alumni = useQuery(api.alumni.getAllAlumni, { limit: 6 });
   const upcomingEvents = useQuery(api.events.getUpcomingEvents, { limit: 4 });
   const userProfile = useQuery(api.alumni.getAlumniProfile, {});
+  const [tab, setTab] = useState<"overview" | "directory" | "events" | "mentorship" | "donations">("overview");
 
   if (isLoading) {
     return (
@@ -54,10 +56,10 @@ export default function Dashboard() {
               </div>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <Button variant="ghost" onClick={() => navigate("/directory")}>Directory</Button>
-              <Button variant="ghost" onClick={() => navigate("/events")}>Events</Button>
-              <Button variant="ghost" onClick={() => navigate("/mentorship")}>Mentorship</Button>
-              <Button variant="ghost" onClick={() => navigate("/profile")}>Profile</Button>
+              <Button variant="ghost" onClick={() => setTab("directory")}>Directory</Button>
+              <Button variant="ghost" onClick={() => setTab("events")}>Events</Button>
+              <Button variant="ghost" onClick={() => setTab("mentorship")}>Mentorship</Button>
+              <Button variant="ghost" onClick={() => setTab("donations")}>Donations</Button>
             </nav>
           </div>
         </div>
@@ -142,7 +144,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="directory">Directory</TabsTrigger>
@@ -182,7 +184,7 @@ export default function Dashboard() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate("/directory")}>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => setTab("directory")}>
                     View All Alumni
                   </Button>
                 </CardContent>
@@ -219,7 +221,7 @@ export default function Dashboard() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate("/events")}>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => setTab("events")}>
                     View All Events
                   </Button>
                 </CardContent>
