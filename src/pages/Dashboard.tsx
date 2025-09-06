@@ -51,7 +51,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <LogoDropdown />
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Alumni Network</h1>
+                <h1 className="text-xl font-bold tracking-tight">Connect-In</h1>
                 <p className="text-sm text-muted-foreground">Welcome back, {user.name || user.email}</p>
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function Dashboard() {
         >
           <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-8 border">
             <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Welcome to the Alumni Network
+              Welcome to Connect-In
             </h2>
             <p className="text-muted-foreground text-lg mb-6">
               Connect, engage, and grow with fellow alumni from around the world.

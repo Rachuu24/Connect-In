@@ -144,7 +144,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <LogoDropdown />
-              <span className="text-xl font-bold tracking-tight">Alumni Network</span>
+              <span className="text-xl font-bold tracking-tight">Connect-In</span>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -192,7 +192,7 @@ export default function Landing() {
                 ) : (
                   <>
                     <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-8 py-6">
-                      Join the Network
+                      Join Connect-In
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                     <Button size="lg" variant="outline" onClick={() => navigate("/auth")} className="text-lg px-8 py-6">
@@ -440,7 +440,7 @@ export default function Landing() {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
-                <span className="text-xl font-bold">Alumni Network</span>
+                <span className="text-xl font-bold">Connect-In</span>
               </div>
               <p className="text-muted-foreground mb-4">
                 Connecting alumni worldwide through a comprehensive digital platform for networking, 
@@ -470,7 +470,7 @@ export default function Landing() {
           </div>
           
           <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 Alumni Network. All rights reserved.</p>
+            <p>&copy; 2024 Connect-In. All rights reserved.</p>
           </div>
         </div>
       </footer>
