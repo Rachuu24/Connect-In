@@ -19,6 +19,10 @@ import {
 import { useNavigate } from "react-router";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -27,7 +31,8 @@ export default function Dashboard() {
   const alumni = useQuery(api.alumni.getAllAlumni, { limit: 6 });
   const upcomingEvents = useQuery(api.events.getUpcomingEvents, { limit: 4 });
   const userProfile = useQuery(api.alumni.getAlumniProfile, {});
-  const [tab, setTab] = useState<"overview" | "directory" | "events" | "mentorship" | "donations">("overview");
+  const [tab, setTab] = useState<"overview" | "directory" | "events" | "mentorship" | "donations" | "profile">("overview");
+  const saveProfile = useMutation(api.alumni.createOrUpdateProfile);
 
   if (isLoading) {
     return (
@@ -60,6 +65,7 @@ export default function Dashboard() {
               <Button variant="ghost" onClick={() => setTab("events")}>Events</Button>
               <Button variant="ghost" onClick={() => setTab("mentorship")}>Mentorship</Button>
               <Button variant="ghost" onClick={() => setTab("donations")}>Donations</Button>
+              <Button variant="ghost" onClick={() => setTab("profile")}>Profile</Button>
             </nav>
           </div>
         </div>
@@ -80,7 +86,7 @@ export default function Dashboard() {
               Connect, engage, and grow with fellow alumni from around the world.
             </p>
             {!userProfile && (
-              <Button onClick={() => navigate("/profile")} size="lg">
+              <Button onClick={() => setTab("profile")} size="lg">
                 Complete Your Profile
               </Button>
             )}
@@ -145,12 +151,13 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="directory">Directory</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
             <TabsTrigger value="donations">Donations</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -370,6 +377,177 @@ export default function Dashboard() {
                     <Button>Make a Donation</Button>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+                <CardDescription>Complete or update your alumni profile.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form
+                  className="space-y-6"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget as HTMLFormElement);
+                    const str = (name: string) => {
+                      const val = (fd.get(name) as string | null) ?? "";
+                      return val.trim();
+                    };
+                    const opt = (name: string) => {
+                      const val = str(name);
+                      return val.length ? val : undefined;
+                    };
+                    const num = (name: string) => {
+                      const n = Number(str(name));
+                      return Number.isFinite(n) ? n : 0;
+                    };
+                    const bool = (name: string) => {
+                      const v = fd.get(name);
+                      return v === "on" || v === "true" || v === "1";
+                    };
+                    const list = (name: string) => {
+                      const raw = str(name);
+                      const arr = raw.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+                      return arr;
+                    };
+
+                    try {
+                      await saveProfile({
+                        firstName: str("firstName") || "First",
+                        lastName: str("lastName") || "Last",
+                        graduationYear: num("graduationYear") || new Date().getFullYear(),
+                        degree: str("degree") || "Bachelor",
+                        major: str("major") || "Undeclared",
+                        currentPosition: opt("currentPosition"),
+                        currentCompany: opt("currentCompany"),
+                        location: opt("location"),
+                        bio: opt("bio"),
+                        linkedinUrl: opt("linkedinUrl"),
+                        twitterUrl: opt("twitterUrl"),
+                        websiteUrl: opt("websiteUrl"),
+                        phoneNumber: opt("phoneNumber"),
+                        isPublic: bool("isPublic"),
+                        mentorshipAvailable: bool("mentorshipAvailable"),
+                        skills: list("skills"),
+                        interests: list("interests"),
+                      });
+                      toast("Profile saved successfully");
+                      setTab("overview");
+                    } catch (err: any) {
+                      toast(`Failed to save profile: ${err?.message ?? "Unknown error"}`);
+                    }
+                  }}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm">First Name</label>
+                      <Input name="firstName" defaultValue={userProfile?.firstName ?? ""} required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Last Name</label>
+                      <Input name="lastName" defaultValue={userProfile?.lastName ?? ""} required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Graduation Year</label>
+                      <Input name="graduationYear" type="number" defaultValue={userProfile?.graduationYear ?? ""} required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Degree</label>
+                      <Input name="degree" defaultValue={userProfile?.degree ?? ""} required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Major</label>
+                      <Input name="major" defaultValue={userProfile?.major ?? ""} required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Current Position</label>
+                      <Input name="currentPosition" defaultValue={userProfile?.currentPosition ?? ""} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Current Company</label>
+                      <Input name="currentCompany" defaultValue={userProfile?.currentCompany ?? ""} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Location</label>
+                      <Input name="location" defaultValue={userProfile?.location ?? ""} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm">Bio</label>
+                    <Textarea name="bio" defaultValue={userProfile?.bio ?? ""} className="min-h-[100px]" />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm">LinkedIn URL</label>
+                      <Input name="linkedinUrl" defaultValue={userProfile?.linkedinUrl ?? ""} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Twitter URL</label>
+                      <Input name="twitterUrl" defaultValue={userProfile?.twitterUrl ?? ""} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Website</label>
+                      <Input name="websiteUrl" defaultValue={userProfile?.websiteUrl ?? ""} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Phone Number</label>
+                      <Input name="phoneNumber" defaultValue={userProfile?.phoneNumber ?? ""} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm">Skills (comma-separated)</label>
+                      <Input
+                        name="skills"
+                        defaultValue={(userProfile?.skills ?? []).join(", ")}
+                        placeholder="React, Node.js, Product Management"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm">Interests (comma-separated)</label>
+                      <Input
+                        name="interests"
+                        defaultValue={(userProfile?.interests ?? []).join(", ")}
+                        placeholder="AI/ML, Startups, Design"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="isPublic"
+                        defaultChecked={userProfile?.isPublic ?? true}
+                        className="h-4 w-4"
+                      />
+                      Public Profile
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="mentorshipAvailable"
+                        defaultChecked={userProfile?.mentorshipAvailable ?? false}
+                        className="h-4 w-4"
+                      />
+                      Open to Mentorship
+                    </label>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button type="submit">Save Profile</Button>
+                    <Button type="button" variant="outline" onClick={() => setTab("overview")}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
