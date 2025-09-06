@@ -68,7 +68,7 @@ export default function Dashboard() {
               <Button variant="ghost" onClick={() => setTab("events")}>Events</Button>
               <Button variant="ghost" onClick={() => setTab("mentorship")}>Mentorship</Button>
               <Button variant="ghost" onClick={() => setTab("donations")}>Donations</Button>
-              <Button variant="ghost" onClick={() => setTab("profile")}>Profile</Button>
+              <Button variant="ghost" onClick={() => navigate("/profile")}>Profile</Button>
             </nav>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function Dashboard() {
               Connect, engage, and grow with fellow alumni from around the world.
             </p>
             {!userProfile && (
-              <Button onClick={() => setTab("profile")} size="lg">
+              <Button onClick={() => navigate("/profile")} size="lg">
                 Complete Your Profile
               </Button>
             )}
