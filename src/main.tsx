@@ -14,9 +14,8 @@ import Dashboard from "./pages/Dashboard.tsx";
 import "./types/global.d.ts";
 import ProfilePage from "@/pages/Profile.tsx";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
-
-
+const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 function RouteSyncer() {
   const location = useLocation();
@@ -41,24 +40,42 @@ function RouteSyncer() {
   return null;
 }
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <VlyToolbar />
     <InstrumentationProvider>
-      <ConvexAuthProvider client={convex}>
-        <BrowserRouter>
-          <RouteSyncer />
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </ConvexAuthProvider>
+      {convex ? (
+        <ConvexAuthProvider client={convex}>
+          <BrowserRouter>
+            <RouteSyncer />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </ConvexAuthProvider>
+      ) : (
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="max-w-xl w-full space-y-4 border rounded-xl p-6 bg-card">
+            <h1 className="text-xl font-bold">Convex URL not configured</h1>
+            <p className="text-sm text-muted-foreground">
+              Set VITE_CONVEX_URL to your Convex deployment URL to enable authentication and data.
+            </p>
+            <ol className="list-decimal list-inside text-sm space-y-2">
+              <li>Open your environment settings and add VITE_CONVEX_URL</li>
+              <li>Value should be your Convex deployment URL (for example, from your Convex dashboard)</li>
+              <li>Reload the app after saving</li>
+            </ol>
+            <p className="text-xs text-muted-foreground">
+              If you need help, contact support via Discord.
+            </p>
+          </div>
+        </div>
+      )}
     </InstrumentationProvider>
   </StrictMode>,
 );
