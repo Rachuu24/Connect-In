@@ -6,7 +6,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -14,37 +14,50 @@ import Dashboard from "./pages/Dashboard.tsx";
 import "./types/global.d.ts";
 import ProfilePage from "@/pages/Profile.tsx";
 
-const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+function MissingConvexConfig() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="max-w-xl w-full border rounded-lg p-6 bg-card">
+        <h1 className="text-xl font-bold mb-2">Convex URL not configured</h1>
+        <p className="text-sm text-muted-foreground mb-4">
+          The app can't reach the backend because VITE_CONVEX_URL is not set.
+        </p>
+        <ol className="list-decimal pl-5 space-y-2 text-sm">
+          <li>Create .env.local at the project root.</li>
+          <li>Add: <code>VITE_CONVEX_URL="https://YOUR-DEPLOYMENT.convex.site"</code></li>
+          <li>Restart the dev server.</li>
+        </ol>
+        <p className="text-xs text-muted-foreground mt-4">
+          Tip: In Convex dashboard → Settings → "Client URL".
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function RouteSyncer() {
   const location = useLocation();
-  useEffect(() => {
-    window.parent.postMessage(
-      { type: "iframe-route-change", path: location.pathname },
-      "*",
-    );
-  }, [location.pathname]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    function handleMessage(event: MessageEvent) {
-      if (event.data?.type === "navigate") {
-        if (event.data.direction === "back") window.history.back();
-        if (event.data.direction === "forward") window.history.forward();
-      }
-    }
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    window.navigateToAuth = (redirectUrl: string) => {
+      navigate(`/auth?redirect=${encodeURIComponent(redirectUrl)}`);
+    };
+  }, [navigate, location.pathname]);
 
   return null;
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <VlyToolbar />
-    <InstrumentationProvider>
-      {convex ? (
+function Boot() {
+  const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
+  if (!url) {
+    return <MissingConvexConfig />;
+  }
+  const convex = new ConvexReactClient(url);
+  return (
+    <>
+      <VlyToolbar />
+      <InstrumentationProvider>
         <ConvexAuthProvider client={convex}>
           <BrowserRouter>
             <RouteSyncer />
@@ -58,24 +71,13 @@ createRoot(document.getElementById("root")!).render(
           </BrowserRouter>
           <Toaster />
         </ConvexAuthProvider>
-      ) : (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="max-w-xl w-full space-y-4 border rounded-xl p-6 bg-card">
-            <h1 className="text-xl font-bold">Convex URL not configured</h1>
-            <p className="text-sm text-muted-foreground">
-              Set VITE_CONVEX_URL to your Convex deployment URL to enable authentication and data.
-            </p>
-            <ol className="list-decimal list-inside text-sm space-y-2">
-              <li>Open your environment settings and add VITE_CONVEX_URL</li>
-              <li>Value should be your Convex deployment URL (for example, from your Convex dashboard)</li>
-              <li>Reload the app after saving</li>
-            </ol>
-            <p className="text-xs text-muted-foreground">
-              If you need help, contact support via Discord.
-            </p>
-          </div>
-        </div>
-      )}
-    </InstrumentationProvider>
+      </InstrumentationProvider>
+    </>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <Boot />
   </StrictMode>,
 );
