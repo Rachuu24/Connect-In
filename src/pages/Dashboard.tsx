@@ -202,10 +202,10 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Calendar className="h-5 w-5" />
-                    <span>Upcoming Events</span>
+                    <span>Notice Board</span>
                   </CardTitle>
                   <CardDescription>
-                    Don't miss these exciting alumni events
+                    Latest announcements and updates for alumni and students
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -228,8 +228,12 @@ export default function Dashboard() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-4" onClick={() => setTab("events")}>
-                    View All Events
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4"
+                    onClick={() => navigate("/notice-board")}
+                  >
+                    Open Notice Board
                   </Button>
                 </CardContent>
               </Card>
