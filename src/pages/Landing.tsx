@@ -116,24 +116,24 @@ function GlobeCanvas() {
     // Helpers to dispose on unmount
     const disposables: Array<THREE.Object3D | THREE.Material | THREE.BufferGeometry> = [];
 
-    // Globe (denser wireframe, deep blue)
-    const globeGeometry = new THREE.SphereGeometry(2, 64, 64);
+    // Globe (denser wireframe, lightened blue)
+    const globeGeometry = new THREE.SphereGeometry(2.4, 64, 64); // increased radius
     const globeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x1f4eff, // deep blue
+      color: 0x3b82f6, // lighter blue
       wireframe: true,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.95,
     });
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
     scene.add(globe);
     disposables.push(globeGeometry, globeMaterial, globe);
 
     // Subtle inner faint fill to give body (very transparent)
-    const fillGeometry = new THREE.SphereGeometry(1.995, 64, 64);
+    const fillGeometry = new THREE.SphereGeometry(2.395, 64, 64); // match larger globe
     const fillMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0b1a3a,
+      color: 0x123064,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.14,
       depthWrite: false,
     });
     const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
@@ -141,10 +141,10 @@ function GlobeCanvas() {
     disposables.push(fillGeometry, fillMaterial, fillMesh);
 
     // Outer glow halo (additive)
-    const glowGeometry = new THREE.SphereGeometry(2.25, 64, 64);
+    const glowGeometry = new THREE.SphereGeometry(2.8, 64, 64); // expanded halo
     const glowMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        glowColor: { value: new THREE.Color(0x1f4eff) },
+        glowColor: { value: new THREE.Color(0x3b82f6) }, // match lightened blue
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -158,7 +158,7 @@ function GlobeCanvas() {
         varying vec3 vNormal;
         void main() {
           float intensity = pow(0.85 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-          gl_FragColor = vec4(glowColor, 0.6) * intensity;
+          gl_FragColor = vec4(glowColor, 0.55) * intensity;
         }
       `,
       side: THREE.BackSide,
@@ -171,11 +171,10 @@ function GlobeCanvas() {
 
     // Small glowing points on sphere surface
     const surfacePoints = (() => {
-      const count = 900;
+      const count = 1100; // slightly denser
       const positions = new Float32Array(count * 3);
-      const radius = 2.04;
+      const radius = 2.45; // follow globe size
       for (let i = 0; i < count; i++) {
-        // fibonacci-ish distribution for uniformity
         const t = i / count;
         const theta = 2.39996322972865332 * i; // ~phi
         const y = 1 - 2 * t;
@@ -189,11 +188,11 @@ function GlobeCanvas() {
       const geom = new THREE.BufferGeometry();
       geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
       const mat = new THREE.PointsMaterial({
-        color: 0x22d3ee, // cyan accents
-        size: 0.02,
+        color: 0x38bdf8, // lighter cyan
+        size: 0.022,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.95,
       });
       const pts = new THREE.Points(geom, mat);
       return { geom, mat, pts };
@@ -206,7 +205,7 @@ function GlobeCanvas() {
       const count = 500;
       const positions = new Float32Array(count * 3);
       for (let i = 0; i < count; i++) {
-        const r = 2.8 + Math.random() * 1.2; // shell around globe
+        const r = 3.2 + Math.random() * 1.2; // expand shell a bit around larger globe
         const u = Math.random();
         const v = Math.random();
         const theta = 2 * Math.PI * u;
@@ -218,7 +217,7 @@ function GlobeCanvas() {
       const geom = new THREE.BufferGeometry();
       geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
       const mat = new THREE.PointsMaterial({
-        color: 0x1e293b, // very subtle dark slate blue
+        color: 0x1e293b,
         size: 0.015,
         sizeAttenuation: true,
         transparent: true,
@@ -230,7 +229,7 @@ function GlobeCanvas() {
     scene.add(starfield.pts);
     disposables.push(starfield.geom, starfield.mat, starfield.pts);
 
-    camera.position.z = 5;
+    camera.position.z = 5.6; // adjust for larger globe while keeping it big in frame
 
     const animate = () => {
       globe.rotation.y += 0.003;
@@ -259,7 +258,6 @@ function GlobeCanvas() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
       scene.clear();
-      // dispose created objects/materials/geometries
       disposables.forEach((d) => {
         // @ts-expect-error - dispose exists on materials/geometries
         if (typeof d.dispose === "function") d.dispose();
@@ -573,7 +571,7 @@ export default function Landing() {
               </p>
             </div>
             <Card className="p-4">
-              <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5">
+              <div className="relative rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5 h-[420px] md:h-[520px] lg:h-[640px]">
                 <div className="absolute inset-0">
                   <GlobeCanvas />
                 </div>
