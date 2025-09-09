@@ -89,6 +89,21 @@ export default function Landing() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Slideshow images and rotation
+  const heroImages = [
+    "https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1600&auto=format&fit=crop",
+  ];
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSlide((s) => (s + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(id);
+  }, []);
+
   const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
@@ -206,10 +221,22 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Background decoration */}
+        {/* Background slideshow */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-accent/5 rounded-full blur-3xl"></div>
+          {/* Images */}
+          {heroImages.map((src, i) => (
+            <motion.img
+              key={src}
+              src={src}
+              alt="alumni community"
+              className="absolute inset-0 h-full w-full object-cover"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: i === slide ? 1 : 0 }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+            />
+          ))}
+          {/* Overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/55 to-background/85" />
         </div>
       </section>
 
