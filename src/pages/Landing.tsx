@@ -552,14 +552,14 @@ export default function Landing() {
       </section>
 
       {/* Optional: Interactive Map / Globe-like network */}
-      <section className="py-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center"
           >
             <div>
               <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
@@ -569,6 +569,27 @@ export default function Landing() {
                 Visualize your community's reach across regions. Our platform helps institutions
                 understand alumni distribution and engagement trends—powering smarter outreach.
               </p>
+              {/* Added compact supporting bullets for more context */}
+              <div className="mt-4 space-y-2">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
+                  <p className="text-sm text-muted-foreground">
+                    Real-time insights into where alumni live, work, and collaborate.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
+                  <p className="text-sm text-muted-foreground">
+                    Identify hotspots for regional meetups and career networking.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
+                  <p className="text-sm text-muted-foreground">
+                    Spotlight emerging fields and industries where your alumni thrive.
+                  </p>
+                </div>
+              </div>
             </div>
             <Card className="p-4">
               <div className="relative rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5 h-[380px] md:h-[480px] lg:h-[600px]">
