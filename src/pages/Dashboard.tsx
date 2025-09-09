@@ -103,7 +103,11 @@ export default function Dashboard() {
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
           <Card>
-            <CardContent className="p-6">
+            <CardContent
+              className="p-6 cursor-pointer"
+              onClick={() => setTab("directory")}
+              title="Open Directory"
+            >
               <div className="flex items-center space-x-2">
                 <Users className="h-8 w-8 text-primary" />
                 <div>
@@ -115,7 +119,11 @@ export default function Dashboard() {
           </Card>
           
           <Card>
-            <CardContent className="p-6">
+            <CardContent
+              className="p-6 cursor-pointer"
+              onClick={() => setTab("events")}
+              title="Open Events"
+            >
               <div className="flex items-center space-x-2">
                 <Calendar className="h-8 w-8 text-primary" />
                 <div>
@@ -143,7 +151,11 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent
+              className="p-6 cursor-pointer"
+              onClick={() => setTab("donations")}
+              title="Open Donations"
+            >
               <div className="flex items-center space-x-2">
                 <Heart className="h-8 w-8 text-primary" />
                 <div>
