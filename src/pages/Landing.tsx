@@ -113,22 +113,38 @@ function GlobeCanvas() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Globe (wireframe)
-    const globeGeometry = new THREE.SphereGeometry(2, 32, 32);
+    // Helpers to dispose on unmount
+    const disposables: Array<THREE.Object3D | THREE.Material | THREE.BufferGeometry> = [];
+
+    // Globe (denser wireframe, deep blue)
+    const globeGeometry = new THREE.SphereGeometry(2, 64, 64);
     const globeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00aaff,
+      color: 0x1f4eff, // deep blue
       wireframe: true,
+      transparent: true,
+      opacity: 0.9,
     });
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
     scene.add(globe);
+    disposables.push(globeGeometry, globeMaterial, globe);
 
-    // Outer glow
-    const glowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
+    // Subtle inner faint fill to give body (very transparent)
+    const fillGeometry = new THREE.SphereGeometry(1.995, 64, 64);
+    const fillMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0b1a3a,
+      transparent: true,
+      opacity: 0.12,
+      depthWrite: false,
+    });
+    const fillMesh = new THREE.Mesh(fillGeometry, fillMaterial);
+    scene.add(fillMesh);
+    disposables.push(fillGeometry, fillMaterial, fillMesh);
+
+    // Outer glow halo (additive)
+    const glowGeometry = new THREE.SphereGeometry(2.25, 64, 64);
     const glowMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        c: { value: 0.9 },
-        p: { value: 2.0 },
-        glowColor: { value: new THREE.Color(0x00aaff) },
+        glowColor: { value: new THREE.Color(0x1f4eff) },
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -141,8 +157,8 @@ function GlobeCanvas() {
         uniform vec3 glowColor;
         varying vec3 vNormal;
         void main() {
-          float intensity = pow( 0.7 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 2.0 );
-          gl_FragColor = vec4( glowColor, 1.0 ) * intensity;
+          float intensity = pow(0.85 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+          gl_FragColor = vec4(glowColor, 0.6) * intensity;
         }
       `,
       side: THREE.BackSide,
@@ -151,12 +167,76 @@ function GlobeCanvas() {
     });
     const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
     scene.add(glowMesh);
+    disposables.push(glowGeometry, glowMaterial, glowMesh);
+
+    // Small glowing points on sphere surface
+    const surfacePoints = (() => {
+      const count = 900;
+      const positions = new Float32Array(count * 3);
+      const radius = 2.04;
+      for (let i = 0; i < count; i++) {
+        // fibonacci-ish distribution for uniformity
+        const t = i / count;
+        const theta = 2.39996322972865332 * i; // ~phi
+        const y = 1 - 2 * t;
+        const r = Math.sqrt(1 - y * y);
+        const x = Math.cos(theta) * r;
+        const z = Math.sin(theta) * r;
+        positions[i * 3 + 0] = x * radius;
+        positions[i * 3 + 1] = y * radius;
+        positions[i * 3 + 2] = z * radius;
+      }
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0x22d3ee, // cyan accents
+        size: 0.02,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.9,
+      });
+      const pts = new THREE.Points(geom, mat);
+      return { geom, mat, pts };
+    })();
+    scene.add(surfacePoints.pts);
+    disposables.push(surfacePoints.geom, surfacePoints.mat, surfacePoints.pts);
+
+    // Sparse starfield around sphere for depth
+    const starfield = (() => {
+      const count = 500;
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const r = 2.8 + Math.random() * 1.2; // shell around globe
+        const u = Math.random();
+        const v = Math.random();
+        const theta = 2 * Math.PI * u;
+        const phi = Math.acos(2 * v - 1);
+        positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.cos(phi);
+        positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+      }
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0x1e293b, // very subtle dark slate blue
+        size: 0.015,
+        sizeAttenuation: true,
+        transparent: true,
+        opacity: 0.6,
+      });
+      const pts = new THREE.Points(geom, mat);
+      return { geom, mat, pts };
+    })();
+    scene.add(starfield.pts);
+    disposables.push(starfield.geom, starfield.mat, starfield.pts);
 
     camera.position.z = 5;
 
     const animate = () => {
-      globe.rotation.y += 0.002;
-      glowMesh.rotation.y += 0.002;
+      globe.rotation.y += 0.003;
+      glowMesh.rotation.y += 0.003;
+      surfacePoints.pts.rotation.y += 0.0035;
+      starfield.pts.rotation.y += 0.0015;
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(animate);
     };
@@ -179,6 +259,14 @@ function GlobeCanvas() {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       resizeObserver.disconnect();
       scene.clear();
+      // dispose created objects/materials/geometries
+      disposables.forEach((d) => {
+        // @ts-expect-error - dispose exists on materials/geometries
+        if (typeof d.dispose === "function") d.dispose();
+        if ((d as any).parent && (d as any).parent.remove) {
+          (d as any).parent.remove(d as any);
+        }
+      });
       renderer.dispose();
       if (renderer.domElement && renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
