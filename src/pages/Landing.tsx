@@ -21,6 +21,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Twitter, Linkedin, Github } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 function CountUp({
   to,
@@ -97,6 +104,33 @@ export default function Landing() {
     e.currentTarget.reset();
   };
 
+  const stats = [
+    { value: 12840, label: "Total Alumni Registered", suffix: "+" },
+    { value: 64, label: "Institutions Connected", suffix: "+" },
+    { value: 742, label: "Events Hosted", suffix: "+" },
+  ];
+
+  const testimonials = [
+    {
+      quote:
+        "I reconnected with classmates and found a mentor who helped me pivot into product management.",
+      name: "Sarah Johnson",
+      title: "Class of 2018 • Senior Product Manager",
+    },
+    {
+      quote:
+        "The events and community discussions are invaluable. I've hired two amazing alumni through this network.",
+      name: "Michael Chen",
+      title: "MBA 2015 • Founder, FinTech Labs",
+    },
+    {
+      quote:
+        "This platform made it easy to give back—I'm now mentoring two students in my field.",
+      name: "Emily Rodriguez",
+      title: "BA 2020 • Marketing Director",
+    },
+  ];
+
   const features = [
     {
       icon: Users,
@@ -128,13 +162,6 @@ export default function Landing() {
       title: "Career Growth",
       description: "Access job opportunities, career resources, and professional development."
     }
-  ];
-
-  const stats = [
-    { value: 10000, label: "Active Alumni", suffix: "+" },
-    { value: 500, label: "Events Hosted", suffix: "+" },
-    { value: 1000, label: "Mentorship Connections", suffix: "+" },
-    { value: 2000000, label: "Donations Raised", prefix: "$", suffix: "+", compact: true },
   ];
 
   return (
@@ -177,26 +204,39 @@ export default function Landing() {
               transition={{ duration: 0.6 }}
             >
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                Connect. Engage.{" "}
+                Connect Alumni. Empower Institutions.{" "}
                 <span className="text-primary">Grow Together.</span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-                Join the premier digital platform for alumni networking, mentorship, and lifelong connections. 
-                Build meaningful relationships that last beyond graduation.
+                A modern, secure, and engaging platform to manage alumni data, build community,
+                and create lasting impact.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 {isAuthenticated ? (
-                  <Button size="lg" onClick={() => navigate("/dashboard")} className="text-lg px-8 py-6">
+                  <Button
+                    size="lg"
+                    onClick={() => navigate("/dashboard")}
+                    className="text-lg px-8 py-6 group transition-transform"
+                  >
                     Go to Dashboard
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 ) : (
                   <>
-                    <Button size="lg" onClick={() => navigate("/auth")} className="text-lg px-8 py-6">
-                      Join Connect-In
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                    <Button
+                      size="lg"
+                      onClick={() => navigate("/auth")}
+                      className="text-lg px-8 py-6 group transition-transform"
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Button>
-                    <Button size="lg" variant="outline" onClick={() => navigate("/auth")} className="text-lg px-8 py-6">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={() => navigate("/auth")}
+                      className="text-lg px-8 py-6"
+                    >
                       Sign In
                     </Button>
                   </>
@@ -206,10 +246,48 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Background decoration */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-accent/5 rounded-full blur-3xl"></div>
+        {/* Subtle animated background: flowing blobs / nodes */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <motion.div
+            className="absolute -top-32 -right-10 w-[520px] h-[520px] bg-primary/10 rounded-full blur-3xl"
+            animate={{ y: [0, -12, 0], x: [0, 8, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-24 -left-16 w-[420px] h-[420px] bg-accent/10 rounded-full blur-3xl"
+            animate={{ y: [0, 14, 0], x: [0, -10, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Glowing network nodes */}
+          <svg
+            className="absolute inset-0 w-full h-full opacity-40"
+            viewBox="0 0 1440 600"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="currentColor" />
+                <stop offset="100%" stopColor="currentColor" />
+              </linearGradient>
+            </defs>
+            <g className="text-primary/15">
+              <circle cx="200" cy="120" r="2">
+                <animate attributeName="r" values="2;4;2" dur="6s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="420" cy="260" r="2">
+                <animate attributeName="r" values="2;4;2" dur="7s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="760" cy="180" r="2">
+                <animate attributeName="r" values="2;4;2" dur="5.5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="1080" cy="320" r="2">
+                <animate attributeName="r" values="2;4;2" dur="6.5s" repeatCount="indefinite" />
+              </circle>
+              <line x1="200" y1="120" x2="420" y2="260" stroke="url(#grad)" strokeOpacity="0.25" />
+              <line x1="420" y1="260" x2="760" y2="180" stroke="url(#grad)" strokeOpacity="0.25" />
+              <line x1="760" y1="180" x2="1080" y2="320" stroke="url(#grad)" strokeOpacity="0.25" />
+            </g>
+          </svg>
         </div>
       </section>
 
@@ -221,16 +299,16 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            className="grid grid-cols-2 md:grid-cols-3 gap-8"
           >
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
                   <CountUp
                     to={stat.value}
-                    prefix={stat.prefix ?? ""}
+                    prefix=""
                     suffix={stat.suffix ?? ""}
-                    compact={stat.compact ?? false}
+                    compact={false}
                   />
                 </div>
                 <div className="text-muted-foreground">{stat.label}</div>
@@ -281,6 +359,104 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Optional: Interactive Map / Globe-like network */}
+      <section className="py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center"
+          >
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+                A Global Alumni Network
+              </h3>
+              <p className="text-muted-foreground">
+                Visualize your community's reach across regions. Our platform helps institutions
+                understand alumni distribution and engagement trends—powering smarter outreach.
+              </p>
+            </div>
+            <Card className="p-4">
+              <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5">
+                {/* Simple animated map grid with pulsing nodes */}
+                <svg viewBox="0 0 800 450" className="w-full h-full">
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" className="text-primary/10" />
+                    </pattern>
+                  </defs>
+                  <rect width="800" height="450" fill="url(#grid)" />
+                  <g className="text-primary/50">
+                    <circle cx="120" cy="160" r="4" className="text-primary">
+                      <animate attributeName="r" values="4;7;4" dur="4s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="300" cy="90" r="4" className="text-primary">
+                      <animate attributeName="r" values="4;7;4" dur="3.5s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="520" cy="200" r="4" className="text-primary">
+                      <animate attributeName="r" values="4;7;4" dur="4.5s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="680" cy="320" r="4" className="text-primary">
+                      <animate attributeName="r" values="4;7;4" dur="5s" repeatCount="indefinite" />
+                    </circle>
+                  </g>
+                </svg>
+              </div>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Testimonials Slider */}
+      <section className="py-24 bg-muted/30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">What Alumni Say</h3>
+            <p className="text-muted-foreground">
+              Real stories from our global community.
+            </p>
+          </motion.div>
+
+          <Carousel className="relative">
+            <CarouselContent>
+              {testimonials.map((t, i) => (
+                <CarouselItem key={i} className="basis-full md:basis-1/2 lg:basis-1/3">
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                  >
+                    <Card className="h-full">
+                      <CardHeader>
+                        <CardTitle className="text-left text-base leading-relaxed">
+                          "{t.quote}"
+                        </CardTitle>
+                        <CardDescription className="pt-2">
+                          <span className="font-medium">{t.name}</span>
+                          <br />
+                          <span className="text-xs">{t.title}</span>
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
+          </Carousel>
         </div>
       </section>
 
