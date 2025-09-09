@@ -28,6 +28,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import * as THREE from "three";
 
 function CountUp({
   to,
@@ -89,6 +90,108 @@ function CountUp({
       {formatted}
       {suffix}
     </span>
+  );
+}
+
+function GlobeCanvas() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const width = containerRef.current.clientWidth;
+    const height = containerRef.current.clientHeight;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    rendererRef.current = renderer;
+
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    containerRef.current.appendChild(renderer.domElement);
+
+    // Globe (wireframe)
+    const globeGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const globeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00aaff,
+      wireframe: true,
+    });
+    const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+    scene.add(globe);
+
+    // Outer glow
+    const glowGeometry = new THREE.SphereGeometry(2.1, 32, 32);
+    const glowMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        c: { value: 0.9 },
+        p: { value: 2.0 },
+        glowColor: { value: new THREE.Color(0x00aaff) },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize( normalMatrix * normal );
+          gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 glowColor;
+        varying vec3 vNormal;
+        void main() {
+          float intensity = pow( 0.7 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) ), 2.0 );
+          gl_FragColor = vec4( glowColor, 1.0 ) * intensity;
+        }
+      `,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+    });
+    const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+    scene.add(glowMesh);
+
+    camera.position.z = 5;
+
+    const animate = () => {
+      globe.rotation.y += 0.002;
+      glowMesh.rotation.y += 0.002;
+      renderer.render(scene, camera);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    // Resize handling (based on container)
+    const handleResize = () => {
+      if (!containerRef.current || !rendererRef.current) return;
+      const w = containerRef.current.clientWidth;
+      const h = containerRef.current.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      rendererRef.current.setSize(w, h);
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      resizeObserver.disconnect();
+      scene.clear();
+      renderer.dispose();
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full rounded-lg"
+      style={{ background: "transparent" }}
+    />
   );
 }
 
@@ -383,29 +486,9 @@ export default function Landing() {
             </div>
             <Card className="p-4">
               <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-br from-primary/5 to-accent/5">
-                {/* Simple animated map grid with pulsing nodes */}
-                <svg viewBox="0 0 800 450" className="w-full h-full">
-                  <defs>
-                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" className="text-primary/10" />
-                    </pattern>
-                  </defs>
-                  <rect width="800" height="450" fill="url(#grid)" />
-                  <g className="text-primary/50">
-                    <circle cx="120" cy="160" r="4" className="text-primary">
-                      <animate attributeName="r" values="4;7;4" dur="4s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="300" cy="90" r="4" className="text-primary">
-                      <animate attributeName="r" values="4;7;4" dur="3.5s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="520" cy="200" r="4" className="text-primary">
-                      <animate attributeName="r" values="4;7;4" dur="4.5s" repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="680" cy="320" r="4" className="text-primary">
-                      <animate attributeName="r" values="4;7;4" dur="5s" repeatCount="indefinite" />
-                    </circle>
-                  </g>
-                </svg>
+                <div className="absolute inset-0">
+                  <GlobeCanvas />
+                </div>
               </div>
             </Card>
           </motion.div>
