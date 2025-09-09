@@ -185,7 +185,7 @@ export default function Landing() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
+          <div className="text-center relative z-20">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -229,14 +229,14 @@ export default function Landing() {
               key={src}
               src={src}
               alt="alumni community"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover z-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: i === slide ? 1 : 0 }}
               transition={{ duration: 0.9, ease: "easeInOut" }}
             />
           ))}
           {/* Overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/55 to-background/85" />
+          <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/75 via-background/55 to-background/85" />
         </div>
       </section>
 
