@@ -92,6 +92,23 @@ const schema = defineSchema(
       .index("by_event", ["eventId"])
       .index("by_user", ["userId"])
       .index("by_event_and_user", ["eventId", "userId"]),
+
+    // QnA Tables
+    qnaQuestions: defineTable({
+      authorId: v.id("users"),
+      body: v.string(),
+      tags: v.array(v.string()),
+      isAnonymous: v.boolean(),
+      upvotes: v.number(),
+    })
+      .index("by_author", ["authorId"]),
+    qnaAnswers: defineTable({
+      questionId: v.id("qnaQuestions"),
+      authorId: v.id("users"),
+      body: v.string(),
+      upvotes: v.number(),
+    })
+      .index("by_question", ["questionId"]),
   },
   {
     schemaValidation: false,

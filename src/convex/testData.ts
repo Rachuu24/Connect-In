@@ -194,6 +194,40 @@ export const seedTestData = mutation({
       status: "registered",
     });
 
-    return { success: true, message: "Seeded users, alumni, events, and registrations." };
+    // Seed QnA test data
+    const q1 = await ctx.db.insert("qnaQuestions", {
+      authorId: userIds[0]!,
+      body: "How to prepare for software engineering interviews as a recent grad?",
+      tags: ["career", "software", "interview"],
+      isAnonymous: true,
+      upvotes: 3,
+    });
+    const q2 = await ctx.db.insert("qnaQuestions", {
+      authorId: userIds[2]!,
+      body: "Best way to transition from marketing to product management?",
+      tags: ["career", "transition", "product"],
+      isAnonymous: true,
+      upvotes: 2,
+    });
+    await ctx.db.insert("qnaAnswers", {
+      questionId: q1,
+      authorId: userIds[1]!,
+      body: "Practice DSA, build small projects, and do mock interviews with peers.",
+      upvotes: 2,
+    });
+    await ctx.db.insert("qnaAnswers", {
+      questionId: q1,
+      authorId: userIds[3]!,
+      body: "Use platforms like LeetCode and focus on fundamentals. Networking helps a lot.",
+      upvotes: 1,
+    });
+    await ctx.db.insert("qnaAnswers", {
+      questionId: q2,
+      authorId: userIds[0]!,
+      body: "Highlight transferable skills, take a PM course, and collaborate with PMs internally.",
+      upvotes: 1,
+    });
+
+    return { success: true, message: "Seeded users, alumni, events, registrations, and QnA." };
   },
 });

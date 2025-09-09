@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<"overview" | "directory" | "events" | "mentorship" | "donations">("overview");
   const mentors = useQuery(api.alumni.getMentors, { limit: 12 });
   const setMentorAvailability = useMutation(api.alumni.setMentorshipAvailability);
+  const qnaCount = useQuery(api.qna.countQuestions, {});
 
   if (isLoading) {
     return (
@@ -126,12 +127,16 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent
+              className="p-6 cursor-pointer"
+              onClick={() => navigate("/qna")}
+              title="Open Anonymous QnA"
+            >
               <div className="flex items-center space-x-2">
                 <MessageSquare className="h-8 w-8 text-primary" />
                 <div>
-                  <p className="text-2xl font-bold">24</p>
-                  <p className="text-sm text-muted-foreground">Active Discussions</p>
+                  <p className="text-2xl font-bold">{qnaCount ?? 0}</p>
+                  <p className="text-sm text-muted-foreground">Anonymous QnA</p>
                 </div>
               </div>
             </CardContent>

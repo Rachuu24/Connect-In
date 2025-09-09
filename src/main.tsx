@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import "./types/global.d.ts";
 import ProfilePage from "@/pages/Profile.tsx";
 import NoticeBoardPage from "@/pages/NoticeBoard.tsx";
+import QnAPage from "@/pages/QnA.tsx";
 
 function MissingConvexConfig() {
   return (
@@ -68,6 +69,7 @@ function Boot() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/notice-board" element={<NoticeBoardPage />} />
+              <Route path="/qna" element={<QnAPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -19,6 +19,7 @@ import type * as auth from "../auth.js";
 import type * as events from "../events.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
+import type * as qna from "../qna.js";
 import type * as testData from "../testData.js";
 import type * as users from "../users.js";
 
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   files: typeof files;
   http: typeof http;
+  qna: typeof qna;
   testData: typeof testData;
   users: typeof users;
 }>;
